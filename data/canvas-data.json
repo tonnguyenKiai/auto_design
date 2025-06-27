@@ -1,0 +1,101 @@
+{
+  "id": "canvas-1",
+  "name": "Sample Canvas",
+  "createdAt": "2024-01-15T10:30:00Z",
+  "updatedAt": "2024-01-15T10:30:00Z",
+  "items": [
+    {
+      "id": "text-1704447000000",
+      "type": "text",
+      "x": 100,
+      "y": 50,
+      "width": 200,
+      "height": 40,
+      "properties": {
+        "text": "Welcome to Editor",
+        "fontSize": 18,
+        "fontFamily": "Arial",
+        "color": "#333333"
+      }
+    },
+    {
+      "id": "button-1704447100000",
+      "type": "button",
+      "x": 100,
+      "y": 120,
+      "width": 150,
+      "height": 45,
+      "properties": {
+        "text": "Click Me",
+        "fontSize": 14,
+        "fontFamily": "Arial",
+        "color": "#ffffff",
+        "backgroundColor": "#007bff",
+        "borderRadius": 6,
+        "padding": 10
+      }
+    },
+    {
+      "id": "input-1704447200000",
+      "type": "input",
+      "x": 300,
+      "y": 50,
+      "width": 250,
+      "height": 40,
+      "properties": {
+        "placeholder": "Enter your name...",
+        "fontSize": 14,
+        "fontFamily": "Arial",
+        "color": "#000000",
+        "backgroundColor": "#ffffff",
+        "borderRadius": 4,
+        "padding": 8
+      }
+    },
+    {
+      "id": "table-1704447300000",
+      "type": "table",
+      "x": 100,
+      "y": 200,
+      "width": 400,
+      "height": 200,
+      "properties": {
+        "rows": 4,
+        "columns": 3,
+        "fontSize": 12,
+        "fontFamily": "Arial",
+        "color": "#000000",
+        "backgroundColor": "#ffffff",
+        "cellData": {
+          "0-0": "1111111111111111111111",
+          "0-1": "Age",
+          "0-2": "City",
+          "1-0": "John Doe",
+          "1-1": "25",
+          "1-2": "New York",
+          "2-0": "Jane Smith",
+          "2-1": "30",
+          "2-2": "Los Angeles",
+          "3-0": "Bob Johnson",
+          "3-1": "35",
+          "3-2": "Chicago"
+        }
+      }
+    },
+    {
+      "id": "select-1704447400000",
+      "type": "select",
+      "x": 300,
+      "y": 120,
+      "width": 180,
+      "height": 40,
+      "properties": {
+        "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+        "fontSize": 14,
+        "fontFamily": "Arial",
+        "color": "#000000",
+        "backgroundColor": "#ffffff"
+      }
+    }
+  ]
+}
