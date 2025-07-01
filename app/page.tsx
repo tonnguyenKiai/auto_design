@@ -16,8 +16,19 @@ import { useState, useRef, useEffect } from 'react'
 import { ComponentLibrary } from '@/components/ComponentLibrary'
 import { Canvas } from '@/components/Canvas'
 import { PropertiesPanel } from '@/components/PropertiesPanel'
-import { ChatPanel } from '@/components/ChatPanel'
-import { MessageSquare } from 'lucide-react'
+import {
+  MessageSquare,
+  Search,
+  ChevronDown,
+  User,
+  Grid3X3,
+  Download,
+  Save,
+  FolderOpen,
+  Trash2,
+  FileUp,
+  Server,
+} from 'lucide-react'
 import {
   saveCanvasToStorage,
   loadCanvasFromStorage,
@@ -31,8 +42,6 @@ import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Grid3X3, Search, User, Trash2, Download, FileUp, Server, FolderOpen } from 'lucide-react'
-import { Type, Square, FileText, Table, ChevronDown, CheckSquare, Circle, AlignLeft, Box, Tag } from 'lucide-react'
 
 export interface CanvasItem {
   id: string
@@ -66,109 +75,6 @@ export interface CanvasItem {
     comment?: string
     value?: string
     [key: string]: any
-  }
-}
-
-const componentIcons = {
-  text: Type,
-  button: Square,
-  input: FileText,
-  table: Table,
-  select: ChevronDown,
-  label: Tag,
-  checkbox: CheckSquare,
-  radio: Circle,
-  textarea: AlignLeft,
-  tabbar: Box,
-  fieldset: Box,
-  searchbutton: Search,
-}
-
-// Helper to render a minimal preview for DragOverlay
-const renderPreviewForType = (itemType: string, props: CanvasItem['properties'], width: number, height: number) => {
-  const style: React.CSSProperties = {
-    width,
-    height,
-    fontSize: props.fontSize || 12,
-    fontFamily: props.fontFamily || 'MS Gothic',
-    color: props.color || '#000000',
-    backgroundColor: props.backgroundColor || '#f0f0f0',
-    border: `1px solid ${props.borderColor || '#cccccc'}`,
-    borderRadius: props.borderRadius || 0,
-    padding: props.padding || 2,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    boxSizing: 'border-box',
-  }
-
-  switch (itemType) {
-    case 'text':
-      return (
-        <div style={{ ...style, backgroundColor: 'transparent', border: 'none' }}>{props.text || 'Sample Text'}</div>
-      )
-    case 'button':
-      return (
-        <button
-          style={{
-            ...style,
-            backgroundColor: props.backgroundColor || '#f0f0f0',
-            borderWidth: props.borderWidth || 2,
-            borderColor: props.borderColor || '#d4d0c8',
-            borderStyle: props.borderStyle || 'outset',
-          }}
-        >
-          {props.text || 'Button'}
-        </button>
-      )
-    case 'input':
-      return (
-        <input
-          type='text'
-          placeholder={props.placeholder || 'Enter text...'}
-          style={{
-            ...style,
-            backgroundColor: props.backgroundColor || '#ffffff',
-            borderWidth: props.borderWidth || 1,
-            borderColor: props.borderColor || '#000000',
-            borderStyle: props.borderStyle || 'solid',
-          }}
-          readOnly
-        />
-      )
-    case 'label':
-      return (
-        <div
-          style={{
-            ...style,
-            backgroundColor: props.backgroundColor || '#006933',
-            color: props.color || '#ffffff',
-            textAlign: 'center',
-          }}
-        >
-          {props.text || 'Label'}
-        </div>
-      )
-    case 'checkbox':
-      return (
-        <div style={{ ...style, backgroundColor: 'transparent', border: 'none' }}>
-          <input type='checkbox' style={{ marginRight: '4px' }} />
-          {props.label || 'Checkbox'}
-        </div>
-      )
-    case 'table':
-      return (
-        <div style={{ ...style, backgroundColor: '#f5f5f5' }}>
-          <div style={{ fontSize: '10px', textAlign: 'center' }}>Table</div>
-        </div>
-      )
-    default:
-      return (
-        <div style={style} className='text-xs'>
-          {itemType}
-        </div>
-      )
   }
 }
 
@@ -329,7 +235,6 @@ export default function EditorPage() {
       // More accurate position calculation
       const x = Math.max(0, mouseX - canvasRect.left - width / 2)
       const y = Math.max(0, mouseY - canvasRect.top - height / 2 - 24) // Adjust for canvas header
-      //setDragPreview({ x, y, width, height })
     }
     // For single existing item, don't update position in handleDragMove - let dnd-kit handle transform
   }
@@ -594,7 +499,6 @@ export default function EditorPage() {
   }
 
   const updateItemProperties = (itemId: string, newProps: Partial<CanvasItem> | Partial<CanvasItem['properties']>) => {
-    console.log('updateItemProperties called:', { itemId, newProps })
     setCanvasItems(prevItems =>
       prevItems.map(item => {
         if (item.id === itemId) {
@@ -623,12 +527,6 @@ export default function EditorPage() {
             finalUpdatedItem.properties = { ...item.properties, ...propertyUpdates }
           }
 
-          console.log('Item updated:', {
-            id: finalUpdatedItem.id,
-            label: finalUpdatedItem.properties.label,
-            width: finalUpdatedItem.width,
-            height: finalUpdatedItem.height,
-          })
           return finalUpdatedItem
         }
         return item
@@ -885,63 +783,96 @@ export default function EditorPage() {
   }
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
-  const chatPanelHeightClass = isChatPanelMinimized ? 'h-12' : 'h-1/3'
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
-      <div className='h-screen flex flex-col bg-gray-50 relative'>
-        {/* Header */}
-        <div className='h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6'>
+      <div className='h-screen flex flex-col bg-gray-100'>
+        {/* Header - Dark Green */}
+        <div className='h-12 bg-[#1d4d35] flex items-center justify-between px-4'>
           <div className='flex items-center space-x-4'>
             <div className='flex items-center space-x-2'>
-              <div className='w-8 h-8 bg-green-600 rounded-full flex items-center justify-center'>
-                <span className='text-white text-sm font-bold'>L</span>
+              <div className='w-8 h-8 bg-white rounded-full flex items-center justify-center'>
+                <div className='w-6 h-6 bg-[#1d4d35] rounded-full'></div>
               </div>
-              <Input
-                value={canvasName}
-                onChange={e => setCanvasName(e.target.value)}
-                className='font-semibold text-gray-800 border-0 focus-visible:ring-0 shadow-none w-auto'
-                placeholder='Canvas Name'
-              />
+              <span className='text-white font-medium text-sm'>Logo</span>
             </div>
             <div className='relative'>
               <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4' />
-              <Input placeholder='検索' className='pl-10 w-64' />
+              <Input placeholder='受入入力' className='pl-10 w-64 h-8 bg-white border-gray-300 text-sm' />
             </div>
           </div>
           <div className='flex items-center space-x-2'>
-            <span className='text-sm text-gray-600'>ユーザー</span>
-            <User className='w-5 h-5 text-gray-600' />
+            <span className='text-white text-sm'>ユーザー</span>
+            <ChevronDown className='w-4 h-4 text-white' />
+            <div className='w-8 h-8 bg-white rounded-full flex items-center justify-center'>
+              <User className='w-5 h-5 text-[#1d4d35]' />
+            </div>
           </div>
         </div>
 
         <div className='flex-1 flex overflow-hidden'>
-          <div className='flex-1 p-6 overflow-y-auto'>
-            <div className='mb-6'>
-              <div className='flex items-center justify-between mb-4'>
-                <h2 className='text-lg font-semibold'>Canvas Editor</h2>
-                <div className='flex items-center space-x-2'>
+          {/* Main Content Area */}
+          <div className='flex-1 flex flex-col'>
+            {/* Component Toolbar */}
+            <div className='bg-gray-200 border-b border-gray-300 px-4 py-2'>
+              <div className='flex items-center justify-between'>
+                <div className='component-library flex-1'>
+                  <ComponentLibrary />
+                </div>
+                <div className='flex items-center space-x-1 ml-4'>
+                  {/* Action buttons */}
                   <Button
                     variant='outline'
                     size='sm'
                     onClick={() => setShowGrid(!showGrid)}
-                    className={showGrid ? 'bg-blue-50 border-blue-300' : ''}
+                    className={`h-7 px-2 text-xs ${showGrid ? 'bg-blue-50 border-blue-300' : ''}`}
                   >
-                    <Grid3X3 className='w-4 h-4 mr-2' /> Grid {showGrid ? 'ON' : 'OFF'}
+                    <Grid3X3 className='w-3 h-3 mr-1' /> Grid
                   </Button>
-                  <select
-                    value={canvasBackgroundColor}
-                    onChange={e => setCanvasBackgroundColor(e.target.value)}
-                    className='px-2 py-1 border border-gray-300 rounded text-xs'
+                  <Button variant='outline' size='sm' onClick={handleLoadFromServerFile} className='h-7 px-2 text-xs'>
+                    <FolderOpen className='w-3 h-3 mr-1' /> Load
+                  </Button>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => {
+                      const fi = document.createElement('input')
+                      fi.type = 'file'
+                      fi.accept = '.json'
+                      fi.onchange = e => {
+                        const f = (e.target as HTMLInputElement).files?.[0]
+                        if (f) handleImportFromJSONFile(f)
+                      }
+                      fi.click()
+                    }}
+                    className='h-7 px-2 text-xs'
                   >
-                    <option value='#e8f7f0'>Light Green</option> <option value='#ffffff'>White</option>{' '}
-                    <option value='#f0f0f0'>Light Gray</option> <option value='#f5f5f5'>Very Light Gray</option>
-                  </select>
+                    <FileUp className='w-3 h-3 mr-1' /> Import
+                  </Button>
+                  <Button variant='outline' size='sm' onClick={handleDownloadJSON} className='h-7 px-2 text-xs'>
+                    <Download className='w-3 h-3 mr-1' /> Export
+                  </Button>
+                  <Button className='bg-blue-600 hover:bg-blue-700 h-7 px-2 text-xs' onClick={saveToServerFile}>
+                    <Server className='w-3 h-3 mr-1' /> Save
+                  </Button>
+                  <Button
+                    className='bg-green-600 hover:bg-green-700 h-7 px-2 text-xs'
+                    onClick={handleSaveToLocalAndServer}
+                  >
+                    <Save className='w-3 h-3 mr-1' /> Save All
+                  </Button>
+                  <Button variant='destructive' onClick={handleResetCanvas} className='h-7 px-2 text-xs'>
+                    <Trash2 className='w-3 h-3 mr-1' /> Reset
+                  </Button>
                 </div>
               </div>
+            </div>
+
+            {/* Canvas Area */}
+            <div className='flex-1 p-4 bg-gray-100 overflow-auto'>
               <div
-                className='border-2 border-blue-500 bg-white rounded-lg relative overflow-hidden'
-                style={{ width: '1093.75px', height: '562px' }}
+                className='bg-white border border-gray-300 rounded relative overflow-hidden mx-auto'
+                style={{ width: '1000px', height: '600px' }}
               >
                 <div ref={canvasContainerRef} data-canvas='true' className='w-full h-full'>
                   <Canvas
@@ -950,8 +881,8 @@ export default function EditorPage() {
                     onSelectItem={handleItemSelect}
                     onUpdateItem={updateItemProperties}
                     onDeleteItem={deleteSelectedItems}
-                    activeId={activeId} // Pass activeId for AlignmentGuides
-                    isDraggingExisting={isDraggingExistingItem} // Pass for AlignmentGuides
+                    activeId={activeId}
+                    isDraggingExisting={isDraggingExistingItem}
                     showGrid={showGrid}
                     dragStartPositions={dragStartPositions}
                     canvasBackgroundColor={canvasBackgroundColor}
@@ -968,71 +899,26 @@ export default function EditorPage() {
                     }}
                   />
                 </div>
-                <div className='absolute bottom-2 right-2 bg-blue-500 text-white px-2 py-1 rounded text-xs font-mono'>
-                  1093.75 × 562
-                </div>
               </div>
-            </div>
-            <div className='flex items-center justify-between mb-6'>
-              <div className='flex space-x-2'>
-                <Button variant='outline' size='sm' onClick={handleLoadFromServerFile}>
-                  <FolderOpen className='w-4 h-4 mr-2' /> Load from Server File
-                </Button>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={() => {
-                    const fi = document.createElement('input')
-                    fi.type = 'file'
-                    fi.accept = '.json'
-                    fi.onchange = e => {
-                      const f = (e.target as HTMLInputElement).files?.[0]
-                      if (f) handleImportFromJSONFile(f)
-                    }
-                    fi.click()
-                  }}
-                >
-                  <FileUp className='w-4 h-4 mr-2' /> Import JSON
-                </Button>
-                <Button variant='outline' size='sm' onClick={handleDownloadJSON}>
-                  <Download className='w-4 h-4 mr-2' /> Download JSON
-                </Button>
-              </div>
-              <div className='flex space-x-2'>
-                <Button className='bg-blue-600 hover:bg-blue-700' onClick={saveToServerFile}>
-                  <Server className='w-4 h-4 mr-2' /> Save to Server File
-                </Button>
-                <Button className='bg-green-600 hover:bg-green-700' onClick={handleSaveToLocalAndServer}>
-                  Save (Server & Local)
-                </Button>
-                <Button variant='destructive' onClick={handleResetCanvas}>
-                  <Trash2 className='w-4 h-4 mr-2' /> Reset Canvas
-                </Button>
-              </div>
-            </div>
-            <div className='component-library'>
-              <h3 className='text-sm font-medium mb-3 text-gray-700'>Components</h3>
-              <ComponentLibrary />
             </div>
           </div>
-          <div className='w-80 bg-white border-l border-gray-200 properties-panel flex-shrink-0 overflow-y-auto'>
+
+          {/* Right Sidebar - Properties Panel */}
+          <div className='w-80 bg-white border-l border-gray-300 properties-panel flex-shrink-0 overflow-y-auto'>
             <Tabs defaultValue='design' className='h-full'>
-              <TabsList className='grid w-full grid-cols-3 sticky top-0 bg-white z-10'>
-                <TabsTrigger value='design'>Design</TabsTrigger> <TabsTrigger value='content'>Content</TabsTrigger>{' '}
-                <TabsTrigger value='comment'>Comment</TabsTrigger>
+              <TabsList className='grid w-full grid-cols-2 sticky top-0 bg-white z-10 border-b border-gray-200'>
+                <TabsTrigger value='design' className='text-sm'>
+                  Design
+                </TabsTrigger>
+                <TabsTrigger value='comment' className='text-sm'>
+                  Comment
+                </TabsTrigger>
               </TabsList>
               <TabsContent value='design' className='h-[calc(100%-3rem)] overflow-y-auto'>
                 <PropertiesPanel
                   selectedItems={selectedItems}
                   onUpdateProperties={p => selectedItems.forEach(item => updateItemProperties(item.id, p))}
                   tabType='design'
-                />
-              </TabsContent>
-              <TabsContent value='content' className='h-[calc(100%-3rem)] overflow-y-auto'>
-                <PropertiesPanel
-                  selectedItems={selectedItems}
-                  onUpdateProperties={p => selectedItems.forEach(item => updateItemProperties(item.id, p))}
-                  tabType='content'
                 />
               </TabsContent>
               <TabsContent value='comment' className='h-[calc(100%-3rem)] overflow-y-auto p-4'>
@@ -1057,31 +943,25 @@ export default function EditorPage() {
                     <p>Select an element for comments.</p>
                   </div>
                 )}
+
+                {/* Chat AI Section */}
+                <div className='mt-8 border-t border-gray-200 pt-4'>
+                  <div className='bg-gray-50 rounded-lg p-4'>
+                    <div className='flex items-center justify-between mb-3'>
+                      <h4 className='font-medium text-gray-700 text-sm'>Chat AI</h4>
+                      <MessageSquare className='w-4 h-4 text-gray-500' />
+                    </div>
+                    <div className='space-y-2'>
+                      <div className='bg-white p-2 rounded text-xs text-gray-600'>みんなの広場</div>
+                      <Input placeholder='メッセージを入力...' className='h-8 text-xs' />
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
             </Tabs>
           </div>
         </div>
 
-        {isChatPanelOpen && (
-          <div
-            className={`fixed bottom-4 right-4 w-80 bg-white border border-gray-300 rounded-lg shadow-xl z-50 chat-panel transition-all duration-300 ease-in-out ${chatPanelHeightClass}`}
-          >
-            <ChatPanel
-              onClose={() => setIsChatPanelOpen(false)}
-              isMinimized={isChatPanelMinimized}
-              onToggleMinimize={() => setIsChatPanelMinimized(!isChatPanelMinimized)}
-            />
-          </div>
-        )}
-        {!isChatPanelOpen && (
-          <Button
-            onClick={() => setIsChatPanelOpen(true)}
-            className='fixed bottom-4 right-4 bg-green-600 hover:bg-green-700 text-white rounded-full p-3 shadow-lg z-50'
-            aria-label='Open Chat'
-          >
-            <MessageSquare className='w-6 h-6' />
-          </Button>
-        )}
         <DragOverlay dropAnimation={null}>{renderDragOverlay()}</DragOverlay>
       </div>
     </DndContext>

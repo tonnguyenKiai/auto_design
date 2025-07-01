@@ -1,7 +1,542 @@
 {
   "id": "canvas-1",
   "name": "My Canvas",
-  "createdAt": "2025-06-27T08:32:35.765Z",
-  "updatedAt": "2025-06-27T08:32:35.765Z",
-  "items": []
+  "createdAt": "2025-07-01T05:03:25.508Z",
+  "updatedAt": "2025-07-01T10:08:03.017Z",
+  "items": [
+    {
+      "id": "label-1751351891512",
+      "type": "label",
+      "x": 25,
+      "y": 34,
+      "width": 117,
+      "height": 33,
+      "properties": {
+        "fontSize": 13,
+        "fontFamily": "MS Gothic",
+        "color": "#ffffff",
+        "comment": "",
+        "text": "AUTO DESIGN",
+        "backgroundColor": "#006933",
+        "borderRadius": 0,
+        "padding": 8,
+        "textAlign": "center"
+      }
+    },
+    {
+      "id": "label-1751351902904",
+      "type": "label",
+      "x": 24,
+      "y": 83,
+      "width": 110,
+      "height": 20,
+      "properties": {
+        "fontSize": 13,
+        "fontFamily": "MS Gothic",
+        "color": "#ffffff",
+        "comment": "",
+        "text": "Label1",
+        "backgroundColor": "#006933",
+        "borderRadius": 0,
+        "padding": 8,
+        "textAlign": "center"
+      }
+    },
+    {
+      "id": "label-1751351905768",
+      "type": "label",
+      "x": 24,
+      "y": 115,
+      "width": 110,
+      "height": 20,
+      "properties": {
+        "fontSize": 13,
+        "fontFamily": "MS Gothic",
+        "color": "#ffffff",
+        "comment": "",
+        "text": "Label2",
+        "backgroundColor": "#006933",
+        "borderRadius": 0,
+        "padding": 8,
+        "textAlign": "center"
+      }
+    },
+    {
+      "id": "label-1751351913968",
+      "type": "label",
+      "x": 24,
+      "y": 148,
+      "width": 110,
+      "height": 20,
+      "properties": {
+        "fontSize": 13,
+        "fontFamily": "MS Gothic",
+        "color": "#ffffff",
+        "comment": "",
+        "text": "Label3",
+        "backgroundColor": "#006933",
+        "borderRadius": 0,
+        "padding": 8,
+        "textAlign": "center"
+      }
+    },
+    {
+      "id": "input-1751351931000",
+      "type": "input",
+      "x": 150,
+      "y": 82,
+      "width": 290,
+      "height": 20,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "placeholder": "Enter text...",
+        "backgroundColor": "#ffffff",
+        "borderWidth": 1,
+        "borderColor": "#000000",
+        "borderStyle": "solid",
+        "borderRadius": 0,
+        "padding": 2,
+        "readonly": false,
+        "value": "wwwwww"
+      }
+    },
+    {
+      "id": "label-1751351984192",
+      "type": "label",
+      "x": 25,
+      "y": 181,
+      "width": 110,
+      "height": 20,
+      "properties": {
+        "fontSize": 13,
+        "fontFamily": "MS Gothic",
+        "color": "#ffffff",
+        "comment": "",
+        "text": "Label4",
+        "backgroundColor": "#006933",
+        "borderRadius": 0,
+        "padding": 8,
+        "textAlign": "center"
+      }
+    },
+    {
+      "id": "input-1751351998072",
+      "type": "input",
+      "x": 150,
+      "y": 114,
+      "width": 290,
+      "height": 20,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "placeholder": "Enter text...",
+        "backgroundColor": "#ffffff",
+        "borderWidth": 1,
+        "borderColor": "#000000",
+        "borderStyle": "solid",
+        "borderRadius": 0,
+        "padding": 2,
+        "readonly": false,
+        "value": "Tôn"
+      }
+    },
+    {
+      "id": "radio-1751352055912",
+      "type": "radio",
+      "x": 154,
+      "y": 181,
+      "width": 16,
+      "height": 16,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "name": "radioGroup",
+        "value": "option1",
+        "checked": true,
+        "checkedBackgroundColor": "#00FFFF"
+      }
+    },
+    {
+      "id": "checkbox-1751352074880",
+      "type": "checkbox",
+      "x": 184,
+      "y": 181,
+      "width": 16,
+      "height": 16,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "checked": true,
+        "checkedBackgroundColor": "#00FFFF",
+        "label": "Label"
+      }
+    },
+    {
+      "id": "select-1751352092560",
+      "type": "select",
+      "x": 150,
+      "y": 150,
+      "width": 180,
+      "height": 20,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": ""
+      }
+    },
+    {
+      "id": "label-1751352116776",
+      "type": "label",
+      "x": 600,
+      "y": 82,
+      "width": 110,
+      "height": 20,
+      "properties": {
+        "fontSize": 13,
+        "fontFamily": "MS Gothic",
+        "color": "#ffffff",
+        "comment": "",
+        "text": "Label5",
+        "backgroundColor": "#006933",
+        "borderRadius": 0,
+        "padding": 8,
+        "textAlign": "center"
+      }
+    },
+    {
+      "id": "input-1751352140512",
+      "type": "input",
+      "x": 721,
+      "y": 80,
+      "width": 216,
+      "height": 20,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#0e3e28",
+        "comment": "comment",
+        "placeholder": "8",
+        "backgroundColor": "#ffffff",
+        "borderWidth": 1,
+        "borderColor": "#000000",
+        "borderStyle": "solid",
+        "borderRadius": 0,
+        "padding": 2,
+        "readonly": true,
+        "value": ""
+      }
+    },
+    {
+      "id": "table-1751352200056",
+      "type": "table",
+      "x": 25,
+      "y": 243,
+      "width": 858,
+      "height": 132,
+      "properties": {
+        "fontSize": 11,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "rows": 4,
+        "columns": 10,
+        "backgroundColor": "#f5f5f5",
+        "headerBackgroundColor": "#1d4d35",
+        "headerColor": "#ffffff",
+        "headerFontWeight": "bold",
+        "cellData": {
+          "0-0": "地図",
+          "0-1": "請求フラグ",
+          "0-2": "取引先CD",
+          "0-3": "取引先名1",
+          "0-4": "業者CD",
+          "0-5": "業者名1",
+          "0-6": "現場CD",
+          "0-7": "現場名1",
+          "0-8": "発行先コード",
+          "0-9": "現場住所1",
+          "1-1": "JQK",
+          "2-1": "JQK",
+          "1-2": "aaaa"
+        },
+        "columnTypes": {},
+        "columnWidths": {
+          "0": 40,
+          "1": 69,
+          "2": 70,
+          "3": 120,
+          "4": 70,
+          "5": 120,
+          "6": 70,
+          "7": 120,
+          "8": 80,
+          "9": 150
+        },
+        "rowHeights": {
+          "0": 25
+        },
+        "rowBackgrounds": {
+          "1": "#f1ea1e"
+        },
+        "columnBackgrounds": {}
+      }
+    },
+    {
+      "id": "checkbox-1751352250152",
+      "type": "checkbox",
+      "x": 39,
+      "y": 281,
+      "width": 16,
+      "height": 16,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "checked": false,
+        "checkedBackgroundColor": "#00FFFF"
+      }
+    },
+    {
+      "id": "checkbox-1751352258632",
+      "type": "checkbox",
+      "x": 39,
+      "y": 310,
+      "width": 16,
+      "height": 16,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "checked": false,
+        "checkedBackgroundColor": "#00FFFF"
+      }
+    },
+    {
+      "id": "tabbar-1751352429352",
+      "type": "tabbar",
+      "x": 25,
+      "y": 219.5,
+      "width": 300,
+      "height": 25,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "tabs": [
+          "Tab 1",
+          "Tab 2",
+          "Tab 3",
+          "Tab 4"
+        ],
+        "activeTab": 2
+      }
+    },
+    {
+      "id": "button-1751352646216",
+      "type": "button",
+      "x": 27.5,
+      "y": 390,
+      "width": 80,
+      "height": 30,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "text": "F1",
+        "backgroundColor": "#f0f0f0",
+        "borderWidth": 2,
+        "borderColor": "#d4d0c8",
+        "borderStyle": "outset",
+        "borderRadius": 0,
+        "padding": 4
+      }
+    },
+    {
+      "id": "button-1751352652424",
+      "type": "button",
+      "x": 124.5,
+      "y": 390,
+      "width": 80,
+      "height": 30,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "text": "F2",
+        "backgroundColor": "#f0f0f0",
+        "borderWidth": 2,
+        "borderColor": "#d4d0c8",
+        "borderStyle": "outset",
+        "borderRadius": 0,
+        "padding": 4
+      }
+    },
+    {
+      "id": "button-1751352669152",
+      "type": "button",
+      "x": 223.5,
+      "y": 390,
+      "width": 80,
+      "height": 30,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "text": "F3",
+        "backgroundColor": "#f0f0f0",
+        "borderWidth": 2,
+        "borderColor": "#d4d0c8",
+        "borderStyle": "outset",
+        "borderRadius": 0,
+        "padding": 4
+      }
+    },
+    {
+      "id": "label-1751361877650",
+      "type": "label",
+      "x": 601,
+      "y": 114,
+      "width": 110,
+      "height": 20,
+      "properties": {
+        "fontSize": 13,
+        "fontFamily": "MS Gothic",
+        "color": "#ffffff",
+        "comment": "",
+        "text": "Label6",
+        "backgroundColor": "#006933",
+        "borderRadius": 0,
+        "padding": 8,
+        "textAlign": "center"
+      }
+    },
+    {
+      "id": "checkbox-label-1751361889009",
+      "type": "checkbox-label",
+      "x": 726,
+      "y": 116,
+      "width": 60,
+      "height": 17,
+      "properties": {
+        "fontSize": 13,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "label": "cb1",
+        "checked": false,
+        "checkedBackgroundColor": "#00FFFF"
+      }
+    },
+    {
+      "id": "checkbox-label-1751361896706",
+      "type": "checkbox-label",
+      "x": 801,
+      "y": 116,
+      "width": 60,
+      "height": 17,
+      "properties": {
+        "fontSize": 13,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "label": "cb2",
+        "checked": true,
+        "checkedBackgroundColor": "#00FFFF"
+      }
+    },
+    {
+      "id": "label-1751361926514",
+      "type": "label",
+      "x": 602,
+      "y": 149,
+      "width": 110,
+      "height": 20,
+      "properties": {
+        "fontSize": 13,
+        "fontFamily": "MS Gothic",
+        "color": "#ffffff",
+        "comment": "",
+        "text": "Label7",
+        "backgroundColor": "#006933",
+        "borderRadius": 0,
+        "padding": 8,
+        "textAlign": "center"
+      }
+    },
+    {
+      "id": "radio-label-1751361939162",
+      "type": "radio-label",
+      "x": 728,
+      "y": 152,
+      "width": 75.8,
+      "height": 17,
+      "properties": {
+        "fontSize": 13,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "label": "option1",
+        "name": "radioGroup",
+        "value": "option1",
+        "checked": true,
+        "checkedBackgroundColor": "#00FFFF"
+      }
+    },
+    {
+      "id": "radio-label-1751361955362",
+      "type": "radio-label",
+      "x": 805,
+      "y": 153,
+      "width": 75.8,
+      "height": 17,
+      "properties": {
+        "fontSize": 13,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "label": "option2",
+        "name": "radioGroup",
+        "value": "option1",
+        "checked": false,
+        "checkedBackgroundColor": "#00FFFF"
+      }
+    },
+    {
+      "id": "searchbutton-1751364443216",
+      "type": "searchbutton",
+      "x": 441,
+      "y": 84,
+      "width": 20,
+      "height": 20,
+      "properties": {
+        "fontSize": 14,
+        "fontFamily": "MS Gothic",
+        "color": "#000000",
+        "comment": "",
+        "text": "",
+        "iconOnly": true,
+        "backgroundColor": "#f0f0f0",
+        "borderWidth": 2,
+        "borderColor": "#d4d0c8",
+        "borderStyle": "outset",
+        "borderRadius": 0
+      }
+    }
+  ]
 }

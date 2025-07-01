@@ -1,21 +1,20 @@
-import { useDraggable } from "@dnd-kit/core"
-import { Button } from "@/components/ui/button"
+import { useDraggable } from '@dnd-kit/core'
+import { Button } from '@/components/ui/button'
 
 const components = [
-  { id: "text", label: "Text" },
-  { id: "button", label: "Button" },
-  { id: "input", label: "Input" },
-  { id: "table", label: "Table" },
-  { id: "select", label: "Select" },
-  { id: "label", label: "Label" },
-  { id: "checkbox-label", label: "Checkbox Label" },
-  { id: "radio-label", label: "Radio Label" },
-  { id: "checkbox", label: "Checkbox" },
-  { id: "radio", label: "Radio" },
-  { id: "textarea", label: "Textarea" },
-  { id: "tabbar", label: "Tab Bar" },
-  { id: "fieldset", label: "Field Set" },
-  { id: "searchbutton", label: "Search" },
+  { id: 'label', label: 'Label' },
+  { id: 'input', label: 'Textbox' },
+  { id: 'button', label: 'Button' },
+  { id: 'checkbox', label: 'Checkbox' },
+  { id: 'checkbox-label', label: 'Checkbox Label' },
+  { id: 'radio', label: 'Radio' },
+  { id: 'radio-label', label: 'Radio Label' },
+  { id: 'table', label: 'Table' },
+  { id: 'select', label: 'Selectbox' },
+  { id: 'searchbutton', label: 'Button search' },
+  { id: 'textarea', label: 'Textarea' },
+  { id: 'tabbar', label: 'Tab Bar' },
+  { id: 'fieldset', label: 'Field Set' },
 ]
 
 function DraggableComponent({ id, label }: { id: string; label: string }) {
@@ -35,12 +34,13 @@ function DraggableComponent({ id, label }: { id: string; label: string }) {
       style={style}
       {...listeners}
       {...attributes}
-      variant="outline"
+      variant='outline'
+      size='sm'
       className={`
-      bg-green-600 text-white border-green-600 hover:bg-green-700 hover:border-green-700
-      cursor-grab active:cursor-grabbing
-      ${isDragging ? "opacity-50" : ""}
-    `}
+        bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400
+        cursor-grab active:cursor-grabbing h-7 px-3 text-xs font-normal
+        ${isDragging ? 'opacity-50' : ''}
+      `}
     >
       {label}
     </Button>
@@ -49,8 +49,8 @@ function DraggableComponent({ id, label }: { id: string; label: string }) {
 
 export function ComponentLibrary() {
   return (
-    <div className="grid grid-cols-7 gap-2">
-      {components.map((component) => (
+    <div className='flex flex-wrap gap-1'>
+      {components.map(component => (
         <DraggableComponent key={component.id} id={component.id} label={component.label} />
       ))}
     </div>
