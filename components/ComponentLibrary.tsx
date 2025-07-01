@@ -8,6 +8,8 @@ const components = [
   { id: "table", label: "Table" },
   { id: "select", label: "Select" },
   { id: "label", label: "Label" },
+  { id: "checkbox-label", label: "Checkbox Label" },
+  { id: "radio-label", label: "Radio Label" },
   { id: "checkbox", label: "Checkbox" },
   { id: "radio", label: "Radio" },
   { id: "textarea", label: "Textarea" },
