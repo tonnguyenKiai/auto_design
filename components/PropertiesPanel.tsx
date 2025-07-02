@@ -12,11 +12,157 @@ interface PropertiesPanelProps {
   selectedItems: CanvasItem[]
   onUpdateProperties: (properties: any) => void
   tabType: 'design' | 'content'
+  selectedTableId?: string | null
+  selectedCells?: string[]
+  onUpdateCellProperties?: (properties: any) => void
 }
 
 const fontFamilies = ['Arial', 'Helvetica', 'Times New Roman', 'Georgia', 'Verdana', 'Courier New']
 
-export function PropertiesPanel({ selectedItems, onUpdateProperties, tabType }: PropertiesPanelProps) {
+export function PropertiesPanel({
+  selectedItems,
+  onUpdateProperties,
+  tabType,
+  selectedTableId,
+  selectedCells = [],
+  onUpdateCellProperties,
+}: PropertiesPanelProps) {
+  // Show cell properties when cells are selected
+  if (selectedTableId && selectedCells.length > 0 && onUpdateCellProperties) {
+    const selectedTable = selectedItems.find(item => item.id === selectedTableId)
+
+    return (
+      <div className='p-4 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto'>
+        <h3 className='text-sm font-medium mb-4 text-gray-700'>
+          Cell Properties ({selectedCells.length} cells selected)
+        </h3>
+
+        {/* Cell Background Color */}
+        <div className='space-y-2'>
+          <Label className='text-xs text-gray-600'>Background Color</Label>
+          <div className='flex items-center space-x-2'>
+            <input
+              type='color'
+              defaultValue='#ffffff'
+              onChange={e => onUpdateCellProperties({ backgroundColor: e.target.value })}
+              className='w-8 h-8 border rounded cursor-pointer'
+            />
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => onUpdateCellProperties({ backgroundColor: '' })}
+              className='text-xs px-2 py-1'
+            >
+              Clear
+            </Button>
+          </div>
+        </div>
+
+        {/* Cell Text Color */}
+        <div className='space-y-2'>
+          <Label className='text-xs text-gray-600'>Text Color</Label>
+          <div className='flex items-center space-x-2'>
+            <input
+              type='color'
+              defaultValue='#000000'
+              onChange={e => onUpdateCellProperties({ color: e.target.value })}
+              className='w-8 h-8 border rounded cursor-pointer'
+            />
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => onUpdateCellProperties({ color: '' })}
+              className='text-xs px-2 py-1'
+            >
+              Clear
+            </Button>
+          </div>
+        </div>
+
+        {/* Cell Font Size */}
+        <div className='space-y-2'>
+          <Label className='text-xs text-gray-600'>Font Size</Label>
+          <div className='flex items-center space-x-2'>
+            <Input
+              type='number'
+              defaultValue={11}
+              onChange={e => onUpdateCellProperties({ fontSize: Number.parseInt(e.target.value) || 11 })}
+              className='w-16 h-8 text-xs text-center'
+              min='8'
+              max='72'
+            />
+            <span className='text-xs text-gray-500'>px</span>
+          </div>
+        </div>
+
+        {/* Cell Font Weight */}
+        <div className='space-y-2'>
+          <Label className='text-xs text-gray-600'>Font Weight</Label>
+          <Select defaultValue='normal' onValueChange={value => onUpdateCellProperties({ fontWeight: value })}>
+            <SelectTrigger className='h-8 text-xs'>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='normal' className='text-xs'>
+                Normal
+              </SelectItem>
+              <SelectItem value='bold' className='text-xs'>
+                Bold
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Cell Text Alignment */}
+        <div className='space-y-2'>
+          <Label className='text-xs text-gray-600'>Text Alignment</Label>
+          <Select defaultValue='center' onValueChange={value => onUpdateCellProperties({ textAlign: value })}>
+            <SelectTrigger className='h-8 text-xs'>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='left' className='text-xs'>
+                Left
+              </SelectItem>
+              <SelectItem value='center' className='text-xs'>
+                Center
+              </SelectItem>
+              <SelectItem value='right' className='text-xs'>
+                Right
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Clear All Cell Styles */}
+        <div className='pt-4 border-t'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => {
+              selectedCells.forEach(cellKey => {
+                onUpdateCellProperties({
+                  backgroundColor: '',
+                  color: '',
+                  fontSize: '',
+                  fontWeight: '',
+                  textAlign: '',
+                })
+              })
+            }}
+            className='w-full text-xs'
+          >
+            Clear All Cell Styles
+          </Button>
+        </div>
+
+        <div className='text-xs text-gray-400 text-center mt-4'>
+          Click cells normally to deselect and return to element properties
+        </div>
+      </div>
+    )
+  }
+
   if (!selectedItems || selectedItems.length === 0) {
     return (
       <div className='p-4'>

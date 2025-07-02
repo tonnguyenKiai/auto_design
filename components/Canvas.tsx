@@ -1,11 +1,11 @@
-"use client"
+'use client'
 
-import type React from "react"
-import { useDroppable, useDndContext, useDraggable } from "@dnd-kit/core"
-import type { CanvasItem } from "@/app/page"
-import { CanvasElement } from "./CanvasElement"
-import { AlignmentGuides } from "./AlignmentGuides"
-import { useMemo } from "react"
+import type React from 'react'
+import { useDroppable, useDndContext, useDraggable } from '@dnd-kit/core'
+import type { CanvasItem } from '@/app/page'
+import { CanvasElement } from './CanvasElement'
+import { AlignmentGuides } from './AlignmentGuides'
+import { useMemo } from 'react'
 
 interface CanvasProps {
   items: CanvasItem[]
@@ -26,6 +26,7 @@ interface CanvasProps {
   onCanvasMouseMove?: (e: React.MouseEvent) => void
   onCanvasMouseUp?: () => void
   onClick?: (e: React.MouseEvent) => void
+  onCellSelectionChange?: (itemId: string, selectedCells: string[]) => void
 }
 
 function MultiSelectDraggable({
@@ -36,9 +37,9 @@ function MultiSelectDraggable({
   selectedItems: CanvasItem[]
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: "multi-select-group",
+    id: 'multi-select-group',
     data: {
-      type: "canvas-item",
+      type: 'canvas-item',
       items: selectedItems,
     },
   })
@@ -47,7 +48,7 @@ function MultiSelectDraggable({
     <div
       ref={setNodeRef}
       className={`absolute border-2 border-purple-500 pointer-events-auto z-20 cursor-move ${
-        isDragging ? "opacity-50" : ""
+        isDragging ? 'opacity-50' : ''
       }`}
       style={{
         left: boundingBox.x,
@@ -57,7 +58,7 @@ function MultiSelectDraggable({
       }}
       {...attributes}
       {...listeners}
-      title="Drag to move all selected items"
+      title='Drag to move all selected items'
     />
   )
 }
@@ -73,7 +74,7 @@ export function Canvas({
   showGrid = true,
   isDraggingExisting = false,
   dragStartPositions,
-  canvasBackgroundColor = "#e8f7f0",
+  canvasBackgroundColor = '#e8f7f0',
   isRectangleSelecting = false,
   rectangleStart,
   rectangleEnd,
@@ -81,18 +82,19 @@ export function Canvas({
   onCanvasMouseMove,
   onCanvasMouseUp,
   onClick,
+  onCellSelectionChange,
 }: CanvasProps) {
   const { setNodeRef } = useDroppable({
-    id: "canvas",
+    id: 'canvas',
   })
 
   const dndContext = useDndContext()
-  const currentDragDelta = dndContext.active?.delta
+  const currentDragDelta: { x: number; y: number } | null = null // Simplified for cursor functionality
   const activeDragId = dndContext.active?.id
 
   const multiSelectBoundingBox = useMemo(() => {
     if (selectedItems.length <= 1) return null
-    const validItems = selectedItems.filter((item) => item && typeof item.x === "number" && typeof item.y === "number")
+    const validItems = selectedItems.filter(item => item && typeof item.x === 'number' && typeof item.y === 'number')
     if (validItems.length <= 1) return null
 
     let minX = Number.POSITIVE_INFINITY,
@@ -100,7 +102,7 @@ export function Canvas({
       maxX = Number.NEGATIVE_INFINITY,
       maxY = Number.NEGATIVE_INFINITY
 
-    validItems.forEach((item) => {
+    validItems.forEach(item => {
       // For multi-selection, use current item positions (already updated in handleDragMove)
       minX = Math.min(minX, item.x)
       minY = Math.min(minY, item.y)
@@ -113,12 +115,12 @@ export function Canvas({
   // Fixed logic for alignment guides - ensure it works for existing items
   const draggedItemForGuides = useMemo(() => {
     // For existing items being dragged
-    if (isDraggingExisting && activeDragId && currentDragDelta && dragStartPositions) {
+    if (isDraggingExisting && activeDragId && dragStartPositions) {
       // Handle multi-select group drag
-      if (activeDragId === "multi-select-group" && multiSelectBoundingBox) {
+      if (activeDragId === 'multi-select-group' && multiSelectBoundingBox) {
         return {
-          id: "multi-select-box",
-          type: "group" as any,
+          id: 'multi-select-box',
+          type: 'group' as any,
           x: multiSelectBoundingBox.x,
           y: multiSelectBoundingBox.y,
           width: multiSelectBoundingBox.width,
@@ -128,13 +130,13 @@ export function Canvas({
       }
 
       // Handle single existing item drag - find the item being dragged
-      const draggedItem = items.find((item) => item.id === activeDragId)
+      const draggedItem = items.find(item => item.id === activeDragId)
       if (draggedItem && dragStartPositions.has(draggedItem.id)) {
         const startPos = dragStartPositions.get(draggedItem.id)!
         return {
           ...draggedItem,
-          x: startPos.x + currentDragDelta.x,
-          y: startPos.y + currentDragDelta.y,
+          x: startPos.x,
+          y: startPos.y,
         }
       }
     }
@@ -142,7 +144,7 @@ export function Canvas({
     // For new items from library - show preview with alignment guides
     if (!isDraggingExisting && dragPreview) {
       return {
-        id: "new-item-preview",
+        id: 'new-item-preview',
         type: activeDragId as any,
         x: dragPreview.x,
         y: dragPreview.y,
@@ -171,12 +173,15 @@ export function Canvas({
   }, [draggedItemForGuides])
 
   return (
-    <div className="w-full h-full relative">
+    <div className='w-full h-full relative'>
       <div
         ref={setNodeRef}
-        data-canvas-droppable="true"
-        className="w-full h-full relative"
-        style={{ backgroundColor: canvasBackgroundColor }}
+        data-canvas-droppable='true'
+        className='w-full h-full relative'
+        style={{
+          backgroundColor: canvasBackgroundColor,
+          cursor: isRectangleSelecting ? 'crosshair' : isDraggingExisting ? 'grabbing' : 'default',
+        }}
         onMouseDown={onCanvasMouseDown}
         onMouseMove={onCanvasMouseMove}
         onMouseUp={onCanvasMouseUp}
@@ -184,28 +189,28 @@ export function Canvas({
       >
         {showGrid && (
           <div
-            className="absolute inset-0 opacity-10 pointer-events-none"
+            className='absolute inset-0 opacity-10 pointer-events-none'
             style={{
               backgroundImage: `linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)`,
-              backgroundSize: "20px 20px",
+              backgroundSize: '20px 20px',
             }}
           />
         )}
-        <div className="absolute top-0 left-0 right-0 h-6 bg-gray-100 border-b border-gray-200 flex items-center px-2 z-10 pointer-events-none">
-          <div className="text-xs text-gray-500">Canvas: {items.length} elements</div>
+        <div className='absolute top-0 left-0 right-0 h-6 bg-gray-100 border-b border-gray-200 flex items-center px-2 z-10 pointer-events-none'>
+          <div className='text-xs text-gray-500'>Canvas: {items.length} elements</div>
           {dragPositionForGuides && (
-            <div className="ml-4 text-xs text-blue-600 font-mono">
+            <div className='ml-4 text-xs text-blue-600 font-mono'>
               Drag: ({Math.round(dragPositionForGuides.x)}, {Math.round(dragPositionForGuides.y)})
             </div>
           )}
           {selectedItems.length === 1 && !activeId && selectedItems[0] && (
-            <div className="ml-4 text-xs text-purple-600 font-mono">
+            <div className='ml-4 text-xs text-purple-600 font-mono'>
               Selected: ({Math.round(selectedItems[0].x)}, {Math.round(selectedItems[0].y)})
             </div>
           )}
           {selectedItems.length > 1 && multiSelectBoundingBox && !activeId && (
-            <div className="ml-4 text-xs text-purple-600 font-mono">
-              Group: ({Math.round(multiSelectBoundingBox.x)}, {Math.round(multiSelectBoundingBox.y)}) W:{" "}
+            <div className='ml-4 text-xs text-purple-600 font-mono'>
+              Group: ({Math.round(multiSelectBoundingBox.x)}, {Math.round(multiSelectBoundingBox.y)}) W:{' '}
               {Math.round(multiSelectBoundingBox.width)} H: {Math.round(multiSelectBoundingBox.height)}
             </div>
           )}
@@ -214,9 +219,7 @@ export function Canvas({
         {/* Show alignment guides for both existing and new items */}
         {draggedItemForGuides && (
           <AlignmentGuides
-            items={items.filter(
-              (it) => it.id !== draggedItemForGuides.id && !selectedItems.find((si) => si.id === it.id),
-            )}
+            items={items.filter(it => it.id !== draggedItemForGuides.id && !selectedItems.find(si => si.id === it.id))}
             draggedItem={draggedItemForGuides}
             dragPosition={dragPositionForGuides!}
           />
@@ -224,7 +227,7 @@ export function Canvas({
 
         {isRectangleSelecting && rectangleStart && rectangleEnd && (
           <div
-            className="absolute border-2 border-blue-500 bg-blue-100 opacity-30 pointer-events-none z-40"
+            className='absolute border-2 border-blue-500 bg-blue-100 opacity-30 pointer-events-none z-40'
             style={{
               left: Math.min(rectangleStart.x, rectangleEnd.x),
               top: Math.min(rectangleStart.y, rectangleEnd.y),
@@ -238,16 +241,17 @@ export function Canvas({
           <MultiSelectDraggable boundingBox={multiSelectBoundingBox} selectedItems={selectedItems} />
         )}
 
-        <div className="pt-6">
-          {items.map((item) => (
+        <div className='pt-6'>
+          {items.map(item => (
             <CanvasElement
               key={item.id}
               item={item}
-              isSelected={selectedItems.some((si) => si.id === item.id)}
-              onSelect={(ctrlKey) => onSelectItem(item, ctrlKey)}
-              onUpdate={(properties) => onUpdateItem(item.id, properties)}
+              isSelected={selectedItems.some(si => si.id === item.id)}
+              onSelect={ctrlKey => onSelectItem(item, ctrlKey)}
+              onUpdate={properties => onUpdateItem(item.id, properties)}
               onDelete={() => onDeleteItem()}
               isMultiSelected={selectedItems.length > 1}
+              onCellSelectionChange={selectedCells => onCellSelectionChange?.(item.id, selectedCells)}
             />
           ))}
         </div>

@@ -2,7 +2,7 @@
 
 import type React from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import type { CanvasItem } from '@/app/page'
 import { Button } from '@/components/ui/button'
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -16,6 +16,7 @@ interface CanvasElementProps {
   onUpdate: (properties: any) => void
   onDelete: () => void
   isMultiSelected?: boolean
+  onCellSelectionChange?: (selectedCells: string[]) => void
 }
 
 const isTextEditableType = (type: CanvasItem['type']) => {
@@ -41,13 +42,8 @@ export function CanvasElement({
   onUpdate,
   onDelete,
   isMultiSelected = false,
+  onCellSelectionChange,
 }: CanvasElementProps) {
-  console.log('CanvasElement render:', {
-    id: item.id,
-    type: item.type,
-    label: item.properties.label,
-    text: item.properties.text,
-  })
   const [isHovered, setIsHovered] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
   const [isEditingText, setIsEditingText] = useState(false)
@@ -60,6 +56,15 @@ export function CanvasElement({
 
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
 
+  // Table cell selection state
+  const [selectedCells, setSelectedCells] = useState<string[]>([])
+  const [isSelectingCells, setIsSelectingCells] = useState(false)
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; visible: boolean }>({
+    x: 0,
+    y: 0,
+    visible: false,
+  })
+
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: item.id,
     data: {
@@ -67,6 +72,206 @@ export function CanvasElement({
     },
     disabled: isEditingText || isResizing || isCommenting,
   })
+
+  const handleCheckboxClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      e.preventDefault() // Prevent default behavior
+
+      // Only toggle if the element is already selected
+      if (!isSelected) {
+        onSelect(false) // Select the element first
+        return
+      }
+
+      // Toggle the state only if already selected
+      if (item.type === 'checkbox-label' || item.type === 'checkbox') {
+        onUpdate({ checked: !item.properties.checked })
+      } else if (item.type === 'radio-label' || item.type === 'radio') {
+        onUpdate({ checked: !item.properties.checked })
+      }
+    },
+    [item.type, item.properties.checked, onUpdate, isSelected, onSelect],
+  )
+
+  // Move all useMemo hooks to the top to fix hooks error
+  const checkboxLabelBg = item.properties.checked ? item.properties.checkedBackgroundColor || '#00FFFF' : 'transparent'
+
+  const radioLabelBg = item.properties.checked ? item.properties.checkedBackgroundColor || '#00FFFF' : 'transparent'
+
+  const checkboxLabelElement = useMemo(
+    () => (
+      <div className='w-full h-full flex items-center space-x-1'>
+        <div
+          className='relative cursor-pointer flex items-center justify-center'
+          style={{
+            width: '13px',
+            height: '13px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #000000',
+            boxSizing: 'border-box',
+          }}
+          onClick={handleCheckboxClick}
+          onMouseDown={e => e.stopPropagation()}
+        >
+          {item.properties.checked && (
+            <div
+              style={{
+                fontSize: '10px',
+                fontWeight: 'bold',
+                color: '#000000',
+                lineHeight: '1',
+                fontFamily: 'monospace',
+              }}
+            >
+              ✓
+            </div>
+          )}
+        </div>
+        <label
+          style={{
+            fontSize: item.properties.fontSize || 13,
+            fontFamily: 'MS Gothic',
+            color: item.properties.color || '#000000',
+            backgroundColor: checkboxLabelBg,
+            padding: checkboxLabelBg !== 'transparent' ? '1px 3px' : '0',
+          }}
+          className='select-none text-xs cursor-pointer'
+          onClick={handleCheckboxClick}
+        >
+          {item.properties.label || 'Label'}
+        </label>
+      </div>
+    ),
+    [
+      item.properties.checked,
+      item.properties.label,
+      item.properties.fontSize,
+      item.properties.color,
+      checkboxLabelBg,
+      handleCheckboxClick,
+    ],
+  )
+
+  const radioLabelElement = useMemo(
+    () => (
+      <div className='w-full h-full flex items-center space-x-1'>
+        <div
+          className='relative cursor-pointer flex items-center justify-center'
+          style={{
+            width: '13px',
+            height: '13px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #000000',
+            borderRadius: '50%',
+            boxSizing: 'border-box',
+          }}
+          onClick={handleCheckboxClick}
+          onMouseDown={e => e.stopPropagation()}
+        >
+          {item.properties.checked && (
+            <div
+              style={{
+                width: '5px',
+                height: '5px',
+                backgroundColor: '#000000',
+                borderRadius: '50%',
+              }}
+            />
+          )}
+        </div>
+        <label
+          style={{
+            fontSize: item.properties.fontSize || 13,
+            fontFamily: 'MS Gothic',
+            color: item.properties.color || '#000000',
+            backgroundColor: radioLabelBg,
+            padding: radioLabelBg !== 'transparent' ? '1px 3px' : '0',
+          }}
+          className='select-none text-xs cursor-pointer'
+          onClick={handleCheckboxClick}
+        >
+          {item.properties.label || 'Label'}
+        </label>
+      </div>
+    ),
+    [
+      item.properties.checked,
+      item.properties.name,
+      item.properties.value,
+      item.properties.label,
+      item.properties.fontSize,
+      item.properties.color,
+      radioLabelBg,
+      handleCheckboxClick,
+    ],
+  )
+
+  const checkboxElement = useMemo(
+    () => (
+      <div className='w-full h-full flex items-center justify-center'>
+        <div
+          className='relative cursor-pointer flex items-center justify-center'
+          style={{
+            width: '13px',
+            height: '13px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #000000',
+            boxSizing: 'border-box',
+          }}
+          onClick={handleCheckboxClick}
+          onMouseDown={e => e.stopPropagation()}
+        >
+          {item.properties.checked && (
+            <div
+              style={{
+                fontSize: '10px',
+                fontWeight: 'bold',
+                color: '#000000',
+                lineHeight: '1',
+                fontFamily: 'monospace',
+              }}
+            >
+              ✓
+            </div>
+          )}
+        </div>
+      </div>
+    ),
+    [item.properties.checked, handleCheckboxClick],
+  )
+
+  const radioElement = useMemo(
+    () => (
+      <div className='w-full h-full flex items-center justify-center'>
+        <div
+          className='relative cursor-pointer flex items-center justify-center'
+          style={{
+            width: '13px',
+            height: '13px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #000000',
+            borderRadius: '50%',
+            boxSizing: 'border-box',
+          }}
+          onClick={handleCheckboxClick}
+          onMouseDown={e => e.stopPropagation()}
+        >
+          {item.properties.checked && (
+            <div
+              style={{
+                width: '5px',
+                height: '5px',
+                backgroundColor: '#000000',
+                borderRadius: '50%',
+              }}
+            />
+          )}
+        </div>
+      </div>
+    ),
+    [item.properties.checked, item.properties.name, item.properties.value, handleCheckboxClick],
+  )
 
   useEffect(() => {
     if (isEditingText && inputRef.current) {
@@ -164,11 +369,6 @@ export function CanvasElement({
   }, [])
 
   const enterEditMode = useCallback(() => {
-    console.log('enterEditMode called:', {
-      type: item.type,
-      isTextEditableType: isTextEditableType(item.type),
-      isCommenting,
-    })
     if (!isTextEditableType(item.type) || isCommenting) return
 
     let currentText = ''
@@ -209,13 +409,11 @@ export function CanvasElement({
       default:
         currentText = ''
     }
-    console.log('Setting edit text:', currentText)
     setEditText(currentText)
     setIsEditingText(true)
   }, [item.type, item.properties, isCommenting])
 
   const handleTextEditSave = useCallback(() => {
-    console.log('handleTextEditSave called:', { type: item.type, editText, isEditingText })
     if (!isTextEditableType(item.type)) return
 
     let propToUpdate: string
@@ -236,8 +434,6 @@ export function CanvasElement({
       propToUpdate = 'text'
     }
 
-    console.log('Updating property:', propToUpdate, 'with value:', editText)
-
     // Auto-resize for text and checkbox/radio labels
     if (item.type === 'text' || item.type === 'checkbox-label' || item.type === 'radio-label') {
       const canvas = document.createElement('canvas')
@@ -253,7 +449,6 @@ export function CanvasElement({
           const metrics = context.measureText(editText)
           const newWidth = Math.max(50, metrics.width + 20) // Add padding
           const newHeight = Math.max(20, fontSize + 6) // Add padding
-          console.log('Text update:', { [propToUpdate]: editText, width: newWidth, height: newHeight })
           onUpdate({
             [propToUpdate]: editText,
             width: newWidth,
@@ -272,14 +467,11 @@ export function CanvasElement({
             width: totalWidth,
             height: totalHeight,
           }
-          console.log('Checkbox/Radio label update:', updateData)
-          console.log('Calling onUpdate with:', updateData)
           onUpdate(updateData)
         }
       }
     } else {
       // For other types, just update the property
-      console.log('Other type update:', { [propToUpdate]: editText })
       onUpdate({ [propToUpdate]: editText })
     }
 
@@ -290,15 +482,175 @@ export function CanvasElement({
     setIsEditingText(false)
   }, [])
 
+  // Table cell selection helpers
+  const handleCellClick = useCallback(
+    (cellKey: string, e: React.MouseEvent) => {
+      if (!isSelected) return // Only allow cell selection when table is selected
+
+      // Only handle cell selection when shift key is pressed
+      if (e.shiftKey) {
+        e.stopPropagation() // Prevent text editing
+
+        if (selectedCells.length > 0) {
+          // Range selection with shift+click
+          const [startRow, startCol] = selectedCells[0].split('-').map(Number)
+          const [endRow, endCol] = cellKey.split('-').map(Number)
+
+          const minRow = Math.min(startRow, endRow)
+          const maxRow = Math.max(startRow, endRow)
+          const minCol = Math.min(startCol, endCol)
+          const maxCol = Math.max(startCol, endCol)
+
+          const rangeCells: string[] = []
+          for (let r = minRow; r <= maxRow; r++) {
+            for (let c = minCol; c <= maxCol; c++) {
+              rangeCells.push(`${r}-${c}`)
+            }
+          }
+          setSelectedCells(rangeCells)
+        } else {
+          // Start new selection
+          setSelectedCells([cellKey])
+        }
+      } else if (e.ctrlKey || e.metaKey) {
+        e.stopPropagation() // Prevent text editing
+        // Multi-select with ctrl+click
+        setSelectedCells(prev => (prev.includes(cellKey) ? prev.filter(c => c !== cellKey) : [...prev, cellKey]))
+      }
+      // If no modifier keys, allow normal text editing (don't stop propagation)
+    },
+    [isSelected, selectedCells],
+  )
+
+  const handleCellRightClick = useCallback(
+    (cellKey: string, e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      if (!isSelected) return
+
+      // If this cell is selected, show context menu
+      if (selectedCells.includes(cellKey) && selectedCells.length > 0) {
+        setContextMenu({
+          x: e.clientX,
+          y: e.clientY,
+          visible: true,
+        })
+      }
+    },
+    [isSelected, selectedCells],
+  )
+
+  const mergeSelectedCells = useCallback(() => {
+    if (selectedCells.length < 2) return
+
+    // Parse selected cells to get bounds
+    const cells = selectedCells.map(key => {
+      const [row, col] = key.split('-').map(Number)
+      return { row, col }
+    })
+
+    const minRow = Math.min(...cells.map(c => c.row))
+    const maxRow = Math.max(...cells.map(c => c.row))
+    const minCol = Math.min(...cells.map(c => c.col))
+    const maxCol = Math.max(...cells.map(c => c.col))
+
+    const colspan = maxCol - minCol + 1
+    const rowspan = maxRow - minRow + 1
+
+    // Check if selection forms a rectangle
+    const expectedCells = colspan * rowspan
+    if (selectedCells.length !== expectedCells) {
+      alert('Please select a rectangular range of cells to merge.')
+      return
+    }
+
+    const newMergedCells = { ...item.properties.mergedCells }
+    const newHiddenCells = { ...item.properties.hiddenCells }
+
+    // Remove existing merges in the range first
+    selectedCells.forEach(cellKey => {
+      if (newMergedCells[cellKey]) {
+        delete newMergedCells[cellKey]
+      }
+      delete newHiddenCells[cellKey]
+    })
+
+    // Set the main cell as merged
+    const mainCellKey = `${minRow}-${minCol}`
+    newMergedCells[mainCellKey] = { colspan, rowspan }
+
+    // Mark other cells as hidden
+    selectedCells.forEach(cellKey => {
+      if (cellKey !== mainCellKey) {
+        newHiddenCells[cellKey] = true
+      }
+    })
+
+    onUpdate({ mergedCells: newMergedCells, hiddenCells: newHiddenCells })
+    setSelectedCells([])
+    setContextMenu({ x: 0, y: 0, visible: false })
+  }, [selectedCells, item.properties.mergedCells, onUpdate])
+
+  const splitSelectedCells = useCallback(() => {
+    if (selectedCells.length === 0) return
+
+    const newMergedCells = { ...item.properties.mergedCells }
+    const newHiddenCells = { ...item.properties.hiddenCells }
+
+    selectedCells.forEach(cellKey => {
+      const mergeInfo = newMergedCells[cellKey]
+      if (mergeInfo) {
+        // Remove the merge
+        delete newMergedCells[cellKey]
+
+        // Unhide all cells that were part of this merge
+        const [row, col] = cellKey.split('-').map(Number)
+        const { colspan = 1, rowspan = 1 } = mergeInfo
+
+        for (let r = row; r < row + rowspan; r++) {
+          for (let c = col; c < col + colspan; c++) {
+            const hiddenCellKey = `${r}-${c}`
+            delete newHiddenCells[hiddenCellKey]
+          }
+        }
+      }
+    })
+
+    onUpdate({ mergedCells: newMergedCells, hiddenCells: newHiddenCells })
+    setSelectedCells([])
+    setContextMenu({ x: 0, y: 0, visible: false })
+  }, [selectedCells, item.properties.mergedCells, onUpdate])
+
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setContextMenu({ x: 0, y: 0, visible: false })
+    }
+
+    if (contextMenu.visible) {
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [contextMenu.visible])
+
+  // Clear selected cells when table is deselected
+  useEffect(() => {
+    if (!isSelected && item.type === 'table') {
+      setSelectedCells([])
+      setContextMenu({ x: 0, y: 0, visible: false })
+    }
+  }, [isSelected, item.type])
+
+  // Notify parent about cell selection changes
+  useEffect(() => {
+    if (item.type === 'table' && onCellSelectionChange) {
+      onCellSelectionChange(selectedCells)
+    }
+  }, [selectedCells, item.type, onCellSelectionChange])
+
   const handleElementClick = useCallback(
     (e: React.MouseEvent) => {
-      console.log('handleElementClick:', {
-        target: (e.target as HTMLElement).tagName,
-        isSelected,
-        isEditingText,
-        type: item.type,
-      })
-
       if (
         isResizing ||
         (e.target as HTMLElement).closest('[data-control-element="true"]') ||
@@ -311,38 +663,41 @@ export function CanvasElement({
         return
       }
 
-      // If clicking on checkbox/radio input, don't enter edit mode
-      const target = e.target as HTMLInputElement
-      if (target.tagName === 'INPUT' && (target.type === 'checkbox' || target.type === 'radio')) {
-        console.log('Clicked on checkbox/radio input, not entering edit mode')
-        if (!isSelected) {
+      // For pure interactive elements (checkbox, radio, table), always select first, don't auto-edit/toggle
+      const isPureInteractiveElement = ['checkbox', 'radio', 'table'].includes(item.type)
+      const isLabelElement = ['checkbox-label', 'radio-label'].includes(item.type)
+
+      if (isPureInteractiveElement) {
+        // Always just select these elements, never auto-edit or auto-toggle
+        if (!isSelected || e.ctrlKey) {
           onSelect(e.ctrlKey)
         }
         return
       }
 
+      // For label elements, allow text editing when already selected
+      if (isLabelElement) {
+        if (!isSelected || e.ctrlKey) {
+          onSelect(e.ctrlKey)
+        } else {
+          // If already selected, allow text editing
+          if (isTextEditableType(item.type) && !isEditingText && !isCommenting) {
+            enterEditMode()
+          }
+        }
+        return
+      }
+
+      // For other elements, keep the original behavior
       if (!isSelected || e.ctrlKey) {
         onSelect(e.ctrlKey)
       } else {
         if (isTextEditableType(item.type) && !isEditingText && !isCommenting) {
-          console.log('Entering edit mode')
           enterEditMode()
         }
       }
     },
     [isSelected, isResizing, isCommenting, isEditingText, onSelect, enterEditMode, item.type],
-  )
-
-  const handleCheckboxClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation()
-      if (item.type === 'checkbox-label' || item.type === 'checkbox') {
-        onUpdate({ checked: !item.properties.checked })
-      } else if (item.type === 'radio-label' || item.type === 'radio') {
-        onUpdate({ checked: !item.properties.checked })
-      }
-    },
-    [item.type, item.properties.checked, onUpdate],
   )
 
   useEffect(() => {
@@ -373,26 +728,21 @@ export function CanvasElement({
     }
   }
 
-  const handleCheckboxDoubleClick = useCallback(
+  const handleDoubleClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
       e.preventDefault()
-      if (item.properties.label && item.properties.label.trim() !== '') {
-        onUpdate({ label: '' })
-      }
-    },
-    [item.properties.label, onUpdate],
-  )
 
-  const handleRadioDoubleClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation()
-      e.preventDefault()
-      if (item.properties.label && item.properties.label.trim() !== '') {
-        onUpdate({ label: '' })
+      // Double-click to enter edit mode for pure interactive elements (not labels)
+      const isPureInteractiveElement = ['checkbox', 'radio', 'table'].includes(item.type)
+
+      if (isPureInteractiveElement && isSelected) {
+        if (isTextEditableType(item.type) && !isEditingText && !isCommenting) {
+          enterEditMode()
+        }
       }
     },
-    [item.properties.label, onUpdate],
+    [item.type, isSelected, isEditingText, isCommenting, enterEditMode],
   )
 
   const renderElement = () => {
@@ -414,19 +764,15 @@ export function CanvasElement({
         ref: inputRef as React.RefObject<any>,
         value: editText,
         onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-          console.log('Input onChange:', e.target.value)
           setEditText(e.target.value)
         },
         onBlur: (e: React.FocusEvent) => {
-          console.log('Input onBlur called')
           handleTextEditSave()
         },
         onKeyDown: (e: React.KeyboardEvent) => {
           if (e.key === 'Enter' && item.type !== 'textarea') {
-            console.log('Enter key pressed')
             handleTextEditSave()
           } else if (e.key === 'Escape') {
-            console.log('Escape key pressed')
             handleTextEditCancel()
           }
         },
@@ -622,105 +968,13 @@ export function CanvasElement({
           />
         )
       case 'checkbox-label':
-        const checkboxLabelBg = item.properties.checked
-          ? item.properties.checkedBackgroundColor || '#00FFFF'
-          : 'transparent'
-
-        return (
-          <div className='w-full h-full flex items-center space-x-1'>
-            <input
-              type='checkbox'
-              checked={item.properties.checked || false}
-              onClick={handleCheckboxClick}
-              className='cursor-pointer'
-              style={{ transform: 'scale(0.8)' }}
-              readOnly
-              onMouseDown={e => e.stopPropagation()}
-            />
-            <label
-              style={{
-                fontSize: item.properties.fontSize || 13,
-                fontFamily: 'MS Gothic',
-                color: item.properties.color || '#000000',
-                backgroundColor: checkboxLabelBg,
-                padding: checkboxLabelBg !== 'transparent' ? '1px 3px' : '0',
-              }}
-              className='select-none text-xs cursor-pointer'
-            >
-              {(() => {
-                const labelText = item.properties.label || 'Label'
-                console.log('Checkbox label render text:', labelText)
-                return labelText
-              })()}
-            </label>
-          </div>
-        )
+        return checkboxLabelElement
       case 'radio-label':
-        const radioLabelBg = item.properties.checked
-          ? item.properties.checkedBackgroundColor || '#00FFFF'
-          : 'transparent'
-
-        return (
-          <div className='w-full h-full flex items-center space-x-1'>
-            <input
-              type='radio'
-              name={item.properties.name || 'radioGroup'}
-              value={item.properties.value || 'option1'}
-              checked={item.properties.checked || false}
-              onClick={handleCheckboxClick}
-              className='cursor-pointer'
-              style={{ transform: 'scale(0.8)' }}
-              readOnly
-              onMouseDown={e => e.stopPropagation()}
-            />
-            <label
-              style={{
-                fontSize: item.properties.fontSize || 13,
-                fontFamily: 'MS Gothic',
-                color: item.properties.color || '#000000',
-                backgroundColor: radioLabelBg,
-                padding: radioLabelBg !== 'transparent' ? '1px 3px' : '0',
-              }}
-              className='select-none text-xs cursor-pointer'
-            >
-              {(() => {
-                const labelText = item.properties.label || 'Label'
-                console.log('Radio label render text:', labelText)
-                return labelText
-              })()}
-            </label>
-          </div>
-        )
+        return radioLabelElement
       case 'checkbox':
-        return (
-          <div className='w-full h-full flex items-center justify-center'>
-            <input
-              type='checkbox'
-              checked={item.properties.checked || false}
-              onClick={handleCheckboxClick}
-              className='cursor-pointer'
-              style={{ transform: 'scale(0.8)' }}
-              readOnly
-              onMouseDown={e => e.stopPropagation()}
-            />
-          </div>
-        )
+        return checkboxElement
       case 'radio':
-        return (
-          <div className='w-full h-full flex items-center justify-center'>
-            <input
-              type='radio'
-              name={item.properties.name || 'radioGroup'}
-              value={item.properties.value || 'option1'}
-              checked={item.properties.checked || false}
-              onClick={handleCheckboxClick}
-              className='cursor-pointer'
-              style={{ transform: 'scale(0.8)' }}
-              readOnly
-              onMouseDown={e => e.stopPropagation()}
-            />
-          </div>
-        )
+        return radioElement
       case 'textarea':
         return (
           <Textarea
@@ -767,7 +1021,7 @@ export function CanvasElement({
             <legend style={style} className='px-2 select-none'>
               {item.properties.legend || 'Field Set'}
             </legend>
-            <div className='text-xs text-gray-400 mt-2 select-none'>Content area</div>
+            <div className='text-xs text-gray-400 mt-2 select-none'></div>
           </fieldset>
         )
       case 'searchbutton':
@@ -792,8 +1046,27 @@ export function CanvasElement({
         return (
           <div
             style={style}
-            className='w-full h-full border border-gray-300 overflow-auto pointer-events-none relative'
+            className={`w-full h-full border border-gray-300 overflow-auto relative ${
+              isSelected ? 'pointer-events-auto' : 'pointer-events-none'
+            }`}
+            onClick={e => {
+              // Clear cell selection when clicking on table background
+              if (e.target === e.currentTarget) {
+                setSelectedCells([])
+              }
+            }}
           >
+            {/* Hidden indicators */}
+            {false && isSelected && (
+              <div className='absolute top-1 right-1 bg-green-500 text-white text-xs px-1 py-0.5 rounded z-10 pointer-events-none'>
+                ✓ Editable
+              </div>
+            )}
+            {false && selectedCells.length > 0 && (
+              <div className='absolute bottom-1 left-1 bg-purple-500 text-white text-xs px-1 py-0.5 rounded z-10 pointer-events-none'>
+                {selectedCells.length} cells selected
+              </div>
+            )}
             <table className='w-full text-xs border-collapse'>
               <tbody>
                 {Array.from({ length: item.properties.rows || 4 }).map((_, rowIndex) => {
@@ -818,22 +1091,49 @@ export function CanvasElement({
                         const customColBg = item.properties.columnBackgrounds?.[colIndex.toString()]
                         const columnWidth = item.properties.columnWidths?.[colIndex.toString()] || 80
 
+                        // Get cell-specific styles
+                        const cellStyles = item.properties.cellStyles?.[cellKey] || {}
+
+                        // Check if this cell is hidden due to being part of a merged cell
+                        const isHiddenCell = item.properties.hiddenCells?.[cellKey]
+                        if (isHiddenCell) {
+                          return null // Don't render hidden cells
+                        }
+
+                        // Check if this cell is merged
+                        const mergedInfo = item.properties.mergedCells?.[cellKey]
+                        const colspan = mergedInfo?.colspan || 1
+                        const rowspan = mergedInfo?.rowspan || 1
+
                         return (
                           <td
                             key={colIndex}
                             className='border border-gray-300 p-1 relative'
+                            colSpan={colspan}
+                            rowSpan={rowspan}
                             style={{
-                              width: columnWidth,
-                              minWidth: columnWidth,
-                              maxWidth: columnWidth,
-                              height: rowHeight,
-                              color: isHeaderRow
-                                ? item.properties.headerColor || '#ffffff'
-                                : item.properties.color || '#000000',
-                              fontWeight: isHeaderRow ? item.properties.headerFontWeight || 'bold' : 'normal',
-                              backgroundColor: customColBg || 'inherit',
+                              width: colspan > 1 ? columnWidth * colspan : columnWidth,
+                              minWidth: colspan > 1 ? columnWidth * colspan : columnWidth,
+                              maxWidth: colspan > 1 ? columnWidth * colspan : columnWidth,
+                              height: rowspan > 1 ? rowHeight * rowspan : rowHeight,
+                              color:
+                                cellStyles.color ||
+                                (isHeaderRow
+                                  ? item.properties.headerColor || '#ffffff'
+                                  : item.properties.color || '#000000'),
+                              fontWeight:
+                                cellStyles.fontWeight ||
+                                (isHeaderRow ? item.properties.headerFontWeight || 'bold' : 'normal'),
+                              fontSize: cellStyles.fontSize || item.properties.fontSize || 11,
+                              backgroundColor: cellStyles.backgroundColor || customColBg || 'inherit',
                               position: 'relative',
+                              textAlign: cellStyles.textAlign || 'center',
+                              verticalAlign: 'middle',
+                              border: selectedCells.includes(cellKey) ? '2px solid #2196f3' : '1px solid #d1d5db',
+                              cursor: isSelected ? 'pointer' : 'default',
                             }}
+                            onClick={e => handleCellClick(cellKey, e)}
+                            onContextMenu={e => handleCellRightClick(cellKey, e)}
                           >
                             {isCheckboxColumn && !isHeaderRow ? (
                               <div className='flex items-center justify-center h-full'>
@@ -841,14 +1141,36 @@ export function CanvasElement({
                                   type='checkbox'
                                   checked={cellValue === '✓'}
                                   onChange={e => {
-                                    const newCellData = { ...item.properties.cellData }
-                                    newCellData[cellKey] = e.target.checked ? '✓' : ''
-                                    onUpdate({ cellData: newCellData })
+                                    if (isSelected) {
+                                      const newCellData = { ...item.properties.cellData }
+                                      newCellData[cellKey] = e.target.checked ? '✓' : ''
+                                      onUpdate({ cellData: newCellData })
+                                    }
                                   }}
                                   className='cursor-pointer'
-                                  style={{ transform: 'scale(0.8)' }}
-                                  onMouseDown={e => e.stopPropagation()}
-                                  onClick={e => e.stopPropagation()}
+                                  style={{
+                                    transform: 'scale(0.8)',
+                                    pointerEvents: isSelected ? 'auto' : 'none',
+                                  }}
+                                  onMouseDown={e => {
+                                    if (isSelected) {
+                                      if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                                        e.preventDefault() // Prevent checkbox interaction when selecting cells
+                                        handleCellClick(cellKey, e) // Call cell selection logic
+                                      }
+                                      e.stopPropagation()
+                                    }
+                                  }}
+                                  onClick={e => {
+                                    if (isSelected) {
+                                      if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                                        e.preventDefault() // Prevent checkbox interaction when selecting cells
+                                        // handleCellClick already called in onMouseDown
+                                      }
+                                      e.stopPropagation()
+                                    }
+                                  }}
+                                  disabled={!isSelected} // Disable until table is selected
                                 />
                               </div>
                             ) : (
@@ -862,19 +1184,46 @@ export function CanvasElement({
                                   onUpdate({ cellData: newCellData })
                                 }}
                                 placeholder={isHeaderRow ? '' : ''}
-                                className='w-full h-full bg-transparent border-none outline-none resize-none text-xs p-1 focus:bg-blue-50 focus:ring-1 focus:ring-blue-300 rounded pointer-events-auto'
+                                className='w-full h-full bg-transparent border-none outline-none resize-none text-xs p-1 rounded'
                                 style={{
-                                  fontSize: item.properties.fontSize || 11,
+                                  fontSize: cellStyles.fontSize || item.properties.fontSize || 11,
                                   fontFamily: item.properties.fontFamily || 'MS Gothic',
-                                  color: isHeaderRow
-                                    ? item.properties.headerColor || '#ffffff'
-                                    : item.properties.color || '#000000',
-                                  fontWeight: isHeaderRow ? item.properties.headerFontWeight || 'bold' : 'normal',
+                                  color:
+                                    cellStyles.color ||
+                                    (isHeaderRow
+                                      ? item.properties.headerColor || '#ffffff'
+                                      : item.properties.color || '#000000'),
+                                  fontWeight:
+                                    cellStyles.fontWeight ||
+                                    (isHeaderRow ? item.properties.headerFontWeight || 'bold' : 'normal'),
+                                  textAlign: cellStyles.textAlign || 'center',
                                   minHeight: rowHeight - 2,
+                                  pointerEvents: isSelected ? 'auto' : 'none', // Only allow interaction when table is selected
                                 }}
-                                onMouseDown={e => e.stopPropagation()}
-                                onFocus={e => e.stopPropagation()}
-                                onClick={e => e.stopPropagation()}
+                                onMouseDown={e => {
+                                  if (isSelected) {
+                                    if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                                      e.preventDefault() // Prevent focus when selecting cells
+                                      handleCellClick(cellKey, e) // Call cell selection logic
+                                    }
+                                    e.stopPropagation()
+                                  }
+                                }}
+                                onFocus={e => {
+                                  if (isSelected) {
+                                    e.stopPropagation()
+                                  }
+                                }}
+                                onClick={e => {
+                                  if (isSelected) {
+                                    if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                                      e.preventDefault() // Prevent editing when selecting cells
+                                      // handleCellClick already called in onMouseDown
+                                    }
+                                    e.stopPropagation()
+                                  }
+                                }}
+                                readOnly={!isSelected} // Make cells read-only until table is selected
                               />
                             )}
                           </td>
@@ -906,7 +1255,8 @@ export function CanvasElement({
     width: item.width,
     height: item.height,
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-    cursor: !isEditingText && !isResizing && !isDragging && !isCommenting ? 'pointer' : undefined,
+    cursor: isEditingText || isResizing || isCommenting ? undefined : isDragging ? 'grabbing' : 'grab',
+    zIndex: isSelected ? 20 : 10, // Ensure selected items stay on top
   }
 
   // Calculate text bounds for tight border on text elements
@@ -970,20 +1320,36 @@ export function CanvasElement({
     return null
   }
 
+  // Calculate bounds for input and textarea elements to ensure border fits content properly
+  const getInputTextareaBounds = () => {
+    if (item.type === 'input' || item.type === 'textarea') {
+      // For input and textarea, border should match exactly the element size
+      return {
+        left: 0,
+        top: 0,
+        width: item.width,
+        height: item.height,
+      }
+    }
+    return null
+  }
+
   const textBounds = item.type === 'text' ? getTextBounds() : null
   const checkboxRadioBounds =
     item.type === 'checkbox-label' || item.type === 'radio-label' ? getCheckboxRadioBounds() : null
+  const inputTextareaBounds = item.type === 'input' || item.type === 'textarea' ? getInputTextareaBounds() : null
 
   return (
     <div
       ref={setNodeRef}
       style={elementStyle}
       className={`absolute select-none border-0
-      ${isDragging ? 'z-50 opacity-50' : 'z-10'}
+      ${isDragging ? 'z-50 opacity-50' : isSelected ? 'z-20' : 'z-10'}
     `}
       onClick={handleElementClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onDoubleClick={handleDoubleClick}
+      onMouseEnter={() => !isSelected && setIsHovered(true)}
+      onMouseLeave={() => !isSelected && setIsHovered(false)}
       {...attributes}
       data-canvas-item='true'
     >
@@ -1010,6 +1376,13 @@ export function CanvasElement({
                   width: checkboxRadioBounds.width,
                   height: checkboxRadioBounds.height,
                 }
+              : inputTextareaBounds
+              ? {
+                  left: inputTextareaBounds.left,
+                  top: inputTextareaBounds.top,
+                  width: inputTextareaBounds.width,
+                  height: inputTextareaBounds.height,
+                }
               : {
                   left: 0,
                   top: 0,
@@ -1020,10 +1393,10 @@ export function CanvasElement({
         />
       )}
 
-      {/* Hover border */}
+      {/* Hover border - only show when not selected */}
       {isHovered && !isCommenting && !isSelected && !isEditingText && (
         <div
-          className='absolute border-2 border-blue-500 pointer-events-none'
+          className='absolute border-2 border-blue-400 pointer-events-none opacity-60'
           style={
             item.type === 'text' && textBounds
               ? {
@@ -1038,6 +1411,13 @@ export function CanvasElement({
                   top: checkboxRadioBounds.top,
                   width: checkboxRadioBounds.width,
                   height: checkboxRadioBounds.height,
+                }
+              : inputTextareaBounds
+              ? {
+                  left: inputTextareaBounds.left,
+                  top: inputTextareaBounds.top,
+                  width: inputTextareaBounds.width,
+                  height: inputTextareaBounds.height,
                 }
               : {
                   left: 0,
@@ -1080,6 +1460,7 @@ export function CanvasElement({
               <Trash2 className='w-2 h-2 text-red-600' />
             </Button>
           </div>
+
           {/* Resize handle - hide for text, checkbox, radio, checkbox-label, radio-label */}
           {!['text', 'checkbox', 'radio', 'checkbox-label', 'radio-label'].includes(item.type) && (
             <div
@@ -1095,6 +1476,11 @@ export function CanvasElement({
                   ? {
                       left: checkboxRadioBounds.left + checkboxRadioBounds.width - 8,
                       top: checkboxRadioBounds.top + checkboxRadioBounds.height - 8,
+                    }
+                  : inputTextareaBounds
+                  ? {
+                      left: inputTextareaBounds.left + inputTextareaBounds.width - 8,
+                      top: inputTextareaBounds.top + inputTextareaBounds.height - 8,
                     }
                   : { bottom: '-0.5rem', right: '-0.5rem' }
               }
@@ -1140,6 +1526,39 @@ export function CanvasElement({
               Save
             </Button>
           </div>
+        </div>
+      )}
+
+      {/* Context Menu for Table Cells */}
+      {contextMenu.visible && item.type === 'table' && (
+        <div
+          className='fixed bg-white border border-gray-300 rounded shadow-lg z-50 py-1'
+          style={{
+            left: contextMenu.x,
+            top: contextMenu.y,
+          }}
+          onClick={e => e.stopPropagation()}
+        >
+          <button
+            className='block w-full text-left px-3 py-1 text-xs hover:bg-gray-100 whitespace-nowrap'
+            onClick={mergeSelectedCells}
+            disabled={selectedCells.length < 2}
+          >
+            🔗 Merge Cells ({selectedCells.length} selected)
+          </button>
+          <button
+            className='block w-full text-left px-3 py-1 text-xs hover:bg-gray-100 whitespace-nowrap'
+            onClick={splitSelectedCells}
+          >
+            ✂️ Split Cells
+          </button>
+          <hr className='my-1' />
+          <button
+            className='block w-full text-left px-3 py-1 text-xs hover:bg-gray-100 text-gray-500 whitespace-nowrap'
+            onClick={() => setContextMenu({ x: 0, y: 0, visible: false })}
+          >
+            Cancel
+          </button>
         </div>
       )}
     </div>

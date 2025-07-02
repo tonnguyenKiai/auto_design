@@ -96,6 +96,10 @@ export default function EditorPage() {
   const [isChatPanelOpen, setIsChatPanelOpen] = useState(true)
   const [isChatPanelMinimized, setIsChatPanelMinimized] = useState(false)
 
+  // Table cell selection state
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null)
+  const [selectedCells, setSelectedCells] = useState<string[]>([])
+
   const mousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
   const canvasContainerRef = useRef<HTMLDivElement>(null)
 
@@ -155,6 +159,9 @@ export default function EditorPage() {
     const { active } = event
     const draggedId = active.id as string
     setActiveId(draggedId)
+
+    // Set cursor to grabbing for all drag operations
+    document.body.style.cursor = 'grabbing'
 
     // Check if dragging multi-select group
     if (draggedId === 'multi-select-group') {
@@ -290,6 +297,9 @@ export default function EditorPage() {
     setIsDraggingExistingItem(false)
     setDragStartPositions(new Map())
     setDragPreview(null)
+
+    // Reset cursor after drag
+    document.body.style.cursor = ''
   }
 
   const getDefaultWidth = (type: string) => {
@@ -492,6 +502,8 @@ export default function EditorPage() {
           },
           rowBackgrounds: {}, // For custom row backgrounds
           columnBackgrounds: {}, // For custom column backgrounds
+          mergedCells: {}, // For merged/spanned cells: { 'row-col': { colspan: 2, rowspan: 1 } }
+          hiddenCells: {}, // For cells that are hidden due to being spanned: { 'row-col': true }
         }
       default:
         return { ...baseProperties }
@@ -593,6 +605,8 @@ export default function EditorPage() {
         if (!e.ctrlKey) {
           setSelectedItems([])
         }
+        // Set crosshair cursor for rectangle selection
+        document.body.style.cursor = 'crosshair'
       }
     }
   }
@@ -626,12 +640,40 @@ export default function EditorPage() {
     setIsRectangleSelecting(false)
     setRectangleStart(null)
     setRectangleEnd(null)
+
+    // Reset cursor after rectangle selection
+    document.body.style.cursor = ''
   }
 
   const deleteSelectedItems = () => {
     const idsToDelete = selectedItems.map(item => item.id)
     setCanvasItems(prev => prev.filter(item => !idsToDelete.includes(item.id)))
     setSelectedItems([])
+  }
+
+  const handleCellSelectionChange = (itemId: string, selectedCells: string[]) => {
+    setSelectedTableId(itemId)
+    setSelectedCells(selectedCells)
+  }
+
+  const updateSelectedCellProperties = (properties: any) => {
+    if (!selectedTableId || selectedCells.length === 0) return
+
+    // Find the table item
+    const tableItem = canvasItems.find(item => item.id === selectedTableId)
+    if (!tableItem || tableItem.type !== 'table') return
+
+    // Update cell properties for selected cells
+    const newCellStyles = { ...(tableItem.properties.cellStyles || {}) }
+
+    selectedCells.forEach(cellKey => {
+      if (!newCellStyles[cellKey]) {
+        newCellStyles[cellKey] = {}
+      }
+      newCellStyles[cellKey] = { ...newCellStyles[cellKey], ...properties }
+    })
+
+    updateItemProperties(selectedTableId, { cellStyles: newCellStyles })
   }
 
   const saveToServerFile = async () => {
@@ -897,6 +939,7 @@ export default function EditorPage() {
                         setSelectedItems([])
                       }
                     }}
+                    onCellSelectionChange={handleCellSelectionChange}
                   />
                 </div>
               </div>
@@ -919,6 +962,9 @@ export default function EditorPage() {
                   selectedItems={selectedItems}
                   onUpdateProperties={p => selectedItems.forEach(item => updateItemProperties(item.id, p))}
                   tabType='design'
+                  selectedTableId={selectedTableId}
+                  selectedCells={selectedCells}
+                  onUpdateCellProperties={updateSelectedCellProperties}
                 />
               </TabsContent>
               <TabsContent value='comment' className='h-[calc(100%-3rem)] overflow-y-auto p-4'>
